@@ -1,5 +1,9 @@
 package roomescape.api;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,38 +15,57 @@ import roomescape.domain.Reservation;
 import roomescape.dto.ReservationCreated;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.utils.DateTimeConverter;
 
-import java.util.ArrayList;
+import java.sql.PreparedStatement;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static roomescape.utils.DateTimeConverter.dateConverter;
-import static roomescape.utils.DateTimeConverter.timeConverter;
 
 @RestController
 @RequestMapping("/reservations")
 public class RoomescapeController {
 
-    private final List<Reservation> reservations = new ArrayList<>();
-    private final AtomicLong id = new AtomicLong(0);
+    private final JdbcTemplate jdbcTemplate;
+
+    public RoomescapeController(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> new Reservation(
+            rs.getLong("id"),
+            rs.getString("name"),
+            DateTimeConverter.dateConverter(rs.getString("date")),
+            DateTimeConverter.timeConverter(rs.getString("time"))
+    );
 
     @GetMapping
     public List<ReservationResponse> search() {
-        return reservations.stream()
+        String sql = "SELECT id, name, date, time FROM reservation";
+        return jdbcTemplate.query(sql, reservationRowMapper).stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
     @PostMapping
     public ReservationCreated add(@RequestBody ReservationRequest reservationRequest) {
-        reservations.add(new Reservation(id.incrementAndGet(), reservationRequest.name(), dateConverter(reservationRequest.date()), timeConverter(reservationRequest.time())));
-        return new ReservationCreated(id.get());
+        String sql = "INSERT INTO reservation (name, date, time) VALUES (?, ?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, reservationRequest.name());
+            ps.setString(2, reservationRequest.date());
+            ps.setString(3, reservationRequest.time());
+            return ps;
+        }, keyHolder);
+
+        Long id = keyHolder.getKey().longValue();
+        return new ReservationCreated(id);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        Reservation reservation = reservations.stream().filter(r -> Objects.equals(r.getId(), id)).findAny().orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
-        reservations.remove(reservation);
+        String sql = "DELETE FROM reservation WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 }
