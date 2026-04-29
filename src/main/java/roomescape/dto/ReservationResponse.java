@@ -5,20 +5,16 @@ import roomescape.domain.Reservation;
 import java.time.format.DateTimeFormatter;
 
 public class ReservationResponse {
-
     private final Long id;
-
     private final String name;
-
     private final String date;
-
-    private final String time;
+    private final ReservationTimeResponse time;
 
     public ReservationResponse(Reservation reservation) {
         this.id = reservation.getId();
         this.name = reservation.getName();
         this.date = reservation.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        this.time = reservation.getTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+        this.time = new ReservationTimeResponse(reservation.getTime());
     }
 
     public Long getId() {
@@ -33,7 +29,7 @@ public class ReservationResponse {
         return date;
     }
 
-    public String getTime() {
+    public ReservationTimeResponse getTime() {
         return time;
     }
 }
