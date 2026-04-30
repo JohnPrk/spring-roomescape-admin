@@ -26,7 +26,6 @@ public class MissionStepTest {
 
     @Test
     void 예약_추가_및_삭제() {
-        // 예약 생성 전에 시간 먼저 생성
         Map<String, String> timeParams = new HashMap<>();
         timeParams.put("startAt", "15:40");
 

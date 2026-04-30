@@ -1,33 +1,23 @@
-package roomescape.api;
+package roomescape.dao;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.ReservationCreated;
-import roomescape.dto.ReservationRequest;
-import roomescape.dto.ReservationResponse;
 import roomescape.utils.DateTimeConverter;
 
 import java.sql.PreparedStatement;
 import java.util.List;
 
-@RestController
-@RequestMapping("/reservations")
-public class RoomescapeController {
+@Repository
+public class ReservationDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public RoomescapeController(JdbcTemplate jdbcTemplate) {
+    public ReservationDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -44,35 +34,28 @@ public class RoomescapeController {
         );
     };
 
-    @GetMapping
-    public List<ReservationResponse> search() {
+    public List<Reservation> findAll() {
         String sql = "SELECT r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as time_value " +
                 "FROM reservation as r INNER JOIN reservation_time as t ON r.time_id = t.id";
-        return jdbcTemplate.query(sql, reservationRowMapper).stream()
-                .map(ReservationResponse::new)
-                .toList();
+        return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
-    @PostMapping
-    public ReservationCreated add(@RequestBody ReservationRequest reservationRequest) {
+    public Long save(Reservation reservation) {
         String sql = "INSERT INTO reservation (name, date, time_id) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservationRequest.name());
-            ps.setString(2, reservationRequest.date());
-            ps.setLong(3, reservationRequest.timeId());
+            ps.setString(1, reservation.getName());
+            ps.setString(2, reservation.getDate().toString());
+            ps.setLong(3, reservation.getTime().getId());
             return ps;
         }, keyHolder);
 
-        Long id = keyHolder.getKey().longValue();
-        return new ReservationCreated(id);
+        return keyHolder.getKey().longValue();
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        String sql = "DELETE FROM reservation WHERE id = ?";
-        jdbcTemplate.update(sql, id);
+    public void deleteById(Long id) {
+        jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }
 }
