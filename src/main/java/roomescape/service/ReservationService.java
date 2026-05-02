@@ -6,6 +6,7 @@ import roomescape.domain.Reservation;
 import roomescape.dto.ReservationCreateResponse;
 import roomescape.dto.ReservationResponse;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 
 import java.util.List;
 
@@ -14,9 +15,11 @@ import java.util.List;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository) {
         this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
     public List<ReservationResponse> getReservations() {
@@ -31,6 +34,9 @@ public class ReservationService {
 
     @Transactional
     public ReservationCreateResponse addReservation(Reservation reservation) {
+        if (!reservationTimeRepository.existsById(reservation.getTime().getId())) {
+            throw new IllegalArgumentException("존재하지 않는 시간 ID입니다.");
+        }
         Long id = reservationRepository.save(reservation);
         return new ReservationCreateResponse(id);
     }
