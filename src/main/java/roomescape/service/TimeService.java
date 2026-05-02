@@ -24,7 +24,7 @@ public class TimeService {
 
     public ReservationTimeResponse addTime(ReservationTime time) {
         Long id = timeRepository.save(time);
-        return new ReservationTimeResponse(id, time.getStartAt().toString());
+        return new ReservationTimeResponse(new ReservationTime(id, time.getStartAt()));
     }
 
     public void deleteTime(Long id) {
