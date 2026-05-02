@@ -1,6 +1,6 @@
 package roomescape.dto;
 
-public record ReservationCreated(
+public record ReservationCreateResponse(
         Long id
 ) {
 }

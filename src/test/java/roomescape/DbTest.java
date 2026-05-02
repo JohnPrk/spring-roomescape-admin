@@ -45,7 +45,7 @@ public class DbTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
-                .jsonPath().getList(".", Map.class); // Reservation 대신 Map으로 받아 구조 파괴 방지
+                .jsonPath().getList(".", Map.class);
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 
