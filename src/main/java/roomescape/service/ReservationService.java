@@ -1,12 +1,12 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.dao.ReservationDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.ReservationCreated;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.repository.ReservationRepository;
 import roomescape.utils.DateTimeConverter;
 
 import java.util.List;
@@ -14,14 +14,14 @@ import java.util.List;
 @Service
 public class ReservationService {
 
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationService(ReservationDao reservationDao) {
-        this.reservationDao = reservationDao;
+    public ReservationService(ReservationRepository reservationRepository) {
+        this.reservationRepository = reservationRepository;
     }
 
     public List<ReservationResponse> getReservations() {
-        return reservationDao.findAll().stream()
+        return reservationRepository.findAll().stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
@@ -35,11 +35,11 @@ public class ReservationService {
                 time
         );
 
-        Long id = reservationDao.save(reservation);
+        Long id = reservationRepository.save(reservation);
         return new ReservationCreated(id);
     }
 
     public void deleteReservation(Long id) {
-        reservationDao.deleteById(id);
+        reservationRepository.deleteById(id);
     }
 }
