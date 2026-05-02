@@ -26,4 +26,8 @@ public class ReservationRepository {
     public void deleteById(Long id) {
         reservationDao.deleteById(id);
     }
+
+    public boolean existsByTimeId(Long timeId) {
+        return reservationDao.existsByTimeId(timeId);
+    }
 }

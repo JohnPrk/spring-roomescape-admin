@@ -34,6 +34,12 @@ public class ReservationDao {
         );
     };
 
+    public boolean existsByTimeId(Long timeId) {
+        String sql = "SELECT COUNT(*) FROM reservation WHERE time_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
+        return count != null && count > 0;
+    }
+
     public List<Reservation> findAll() {
         String sql = "SELECT r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as time_value " +
                 "FROM reservation as r INNER JOIN reservation_time as t ON r.time_id = t.id";

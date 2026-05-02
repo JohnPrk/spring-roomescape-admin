@@ -25,6 +25,10 @@ public class ReservationService {
                 .toList();
     }
 
+    public boolean hasReservationsByTimeId(Long timeId) {
+        return reservationRepository.existsByTimeId(timeId);
+    }
+
     @Transactional
     public ReservationCreateResponse addReservation(Reservation reservation) {
         Long id = reservationRepository.save(reservation);
