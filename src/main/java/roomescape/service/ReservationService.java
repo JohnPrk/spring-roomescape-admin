@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.dto.ReservationCreateResponse;
 import roomescape.dto.ReservationResponse;
@@ -9,6 +10,7 @@ import roomescape.repository.ReservationRepository;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -23,11 +25,13 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationCreateResponse addReservation(Reservation reservation) {
         Long id = reservationRepository.save(reservation);
         return new ReservationCreateResponse(id);
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
         reservationRepository.deleteById(id);
     }
