@@ -7,10 +7,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.dto.ReservationCreateResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.utils.DateTimeConverter;
 
 import java.util.List;
 
@@ -30,8 +33,16 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ReservationCreateResponse add(@RequestBody ReservationRequest reservationRequest) {
-        return reservationService.addReservation(reservationRequest);
+    public ReservationCreateResponse add(@RequestBody ReservationRequest request) {
+        ReservationTime time = new ReservationTime(request.timeId(), null);
+        Reservation reservation = new Reservation(
+                null,
+                request.name(),
+                DateTimeConverter.dateConverter(request.date()),
+                time
+        );
+
+        return reservationService.addReservation(reservation);
     }
 
     @DeleteMapping("/{id}")

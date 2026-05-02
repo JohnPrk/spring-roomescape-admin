@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.domain.ReservationTime;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.dto.ReservationTimeResponse;
 import roomescape.service.TimeService;
+import roomescape.utils.DateTimeConverter;
 
 import java.util.List;
 
@@ -30,7 +32,8 @@ public class TimeController {
 
     @PostMapping
     public ReservationTimeResponse add(@RequestBody ReservationTimeRequest request) {
-        return timeService.addTime(request);
+        ReservationTime time = new ReservationTime(null, DateTimeConverter.timeConverter(request.startAt()));
+        return timeService.addTime(time);
     }
 
     @DeleteMapping("/{id}")

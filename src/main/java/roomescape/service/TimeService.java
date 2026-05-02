@@ -2,10 +2,8 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.ReservationTimeRequest;
 import roomescape.dto.ReservationTimeResponse;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.utils.DateTimeConverter;
 
 import java.util.List;
 
@@ -24,10 +22,9 @@ public class TimeService {
                 .toList();
     }
 
-    public ReservationTimeResponse addTime(ReservationTimeRequest request) {
-        ReservationTime time = new ReservationTime(null, DateTimeConverter.timeConverter(request.startAt()));
+    public ReservationTimeResponse addTime(ReservationTime time) {
         Long id = timeRepository.save(time);
-        return new ReservationTimeResponse(id, request.startAt());
+        return new ReservationTimeResponse(id, time.getStartAt().toString());
     }
 
     public void deleteTime(Long id) {
